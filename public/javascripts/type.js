@@ -25,8 +25,24 @@ $(function() {
     typeracer.text_position = 0;
     setNextCharacter();
 
+    typeracer.socket = io.connect('http://localhost', {
+      'force new connection': true,
+      'reconnect': true,
+      'reconnection delay': 500,
+      'max reconnection attempts': 10
+    });
+
+    typeracer.socket.on('connect', function () {
+      var nickname = getRandomName();
+      typeracer.socket.emit('user_join', {nickname: nickname});
+    });
+    typeracer.socket.on('user_join', function(user) {
+      typeracer.addPlayer(user);
+    });
+
     $('#playerReady').click(function() {
       $('#playerReady').hide();
+      typeracer.socket.emit('player_ready');
       playerReady(typeracer.user);
     });
   };
